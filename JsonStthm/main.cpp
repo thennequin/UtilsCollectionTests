@@ -66,12 +66,45 @@ bool GasonTestFile(const char* pFilePath)
 }
 
 
+void GetReadableSize(int iSize, char* pBuffer, int iBufferSize)
+{
+	static const char* const pSizes[] = { "bytes", "Kb", "Mb", "Gb" };
+	int iDiv = 0;
+	int iRem = 0;
+
+	while (iSize >= 1024 && iDiv < (sizeof pSizes / sizeof *pSizes)) {
+		iRem = (iSize % 1024);
+		iDiv++;
+		iSize /= 1024;
+	}
+
+	snprintf(pBuffer, iBufferSize, "%.1f %s\n", (float)iSize + (float)iRem / 1024.0, pSizes[iDiv]);
+}
+
+void GetReadableTime(uint64_t iNanoseconds, char* pBuffer, int iBufferSize)
+{
+	static const char* const pTimes[] = { "ns", "us", "ms", "s" };
+	int iDiv = 0;
+	int iRem = 0;
+
+	while (iNanoseconds >= 1000 && iDiv < (sizeof pTimes / sizeof *pTimes)) {
+		iRem = (iNanoseconds % 1000);
+		iDiv++;
+		iNanoseconds /= 1000;
+	}
+
+	snprintf(pBuffer, iBufferSize, "%.3f %s\n", (float)iNanoseconds + (float)iRem / 1000.0, pTimes[iDiv]);
+}
+
 void LaunchTest(const char* pName, bool(*pFunction)(const char*), const char* pFile)
 {
 	uint64_t iStartTime = nanotime();
 	bool bOk = pFunction(pFile);
 	uint64_t iEndTime = nanotime();
-	printf("%s : %s\n\t time %d ns\n", pName, bOk ? "Ok" : "Fail", (iEndTime - iStartTime));
+
+	char pBuffer[256];
+	GetReadableTime(iEndTime - iStartTime, pBuffer, 256);
+	printf("%s : %s\n\t time %s\n", pName, bOk ? "Ok" : "Fail", pBuffer);
 }
 
 void main()
