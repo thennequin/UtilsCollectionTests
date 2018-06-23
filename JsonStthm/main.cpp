@@ -33,7 +33,8 @@ uint64_t nanotime() {
 bool StthmTestFile(const char* pFilePath)
 {
 	JsonStthm::JsonValue oValue;
-	return oValue.ReadFile(pFilePath) == 0;
+	int iLineError = oValue.ReadFile(pFilePath);
+	return iLineError == 0;
 }
 
 bool JsonXXTestFile(const char* pFile)
@@ -65,22 +66,20 @@ bool GasonTestFile(const char* pFilePath)
 }
 
 
+void LaunchTest(const char* pName, bool(*pFunction)(const char*), const char* pFile)
+{
+	uint64_t iStartTime = nanotime();
+	bool bOk = pFunction(pFile);
+	uint64_t iEndTime = nanotime();
+	printf("%s : %s\n\t time %d ns\n", pName, bOk ? "Ok" : "Fail", (iEndTime - iStartTime));
+}
+
 void main()
 {
-	{
-		uint64_t iStartTime = nanotime();
-		GasonTestFile("../Data/big.json");
-		uint64_t iEndTime = nanotime();
-	
-		printf("gason time %d ns\n", (iEndTime - iStartTime));
-	}
+	const char* pFile = "../../Data/big.json";
 
-	{
-		uint64_t iStartTime = nanotime();
-		StthmTestFile("../Data/big.json");
-		uint64_t iEndTime = nanotime();
-		printf("JsonStthm time %d ns\n", (iEndTime - iStartTime));
-	}
+	LaunchTest("Gason", GasonTestFile, pFile);
+	LaunchTest("JsonStthm", StthmTestFile, pFile);
 
 	JsonStthm::JsonValue oValue;
 	JsonStthm::JsonValue& oArray = oValue["myArray"];
