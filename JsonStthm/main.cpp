@@ -6,6 +6,8 @@
 
 #include "JsonStthm.h"
 
+#include <string>
+
 //#include "jsonxx.h"
 
 #include "gason.h"
@@ -120,7 +122,7 @@ void main()
 	oArray[1] = false;
 	oArray[2] = 3.14159265359f;
 
-	JsonStthm::String sOut;
+	std::string sOut;
 	oValue.WriteString(sOut);
 
 	system("pause");
