@@ -42,6 +42,13 @@ bool StthmTestFile(const char* pFilePath)
 	return iLineError == 0;
 }
 
+bool StthmDocTestFile(const char* pFilePath)
+{
+	JsonStthm::JsonDoc oDoc;
+	int iLineError = oDoc.ReadFile(pFilePath);
+	return iLineError == 0;
+}
+
 bool JsonXXTestFile(const char* pFile)
 {
 	std::filebuf oFileBuf;
@@ -150,8 +157,8 @@ void main()
 {
 	const char* pFile = "../../Data/big.json";
 
-	LaunchTest("Gason", GasonTestFile, pFile);
-	LaunchTest("JsonStthm", StthmTestFile, pFile);
+	LaunchTest("JsonStthm::JsonValue", StthmTestFile, pFile);
+	LaunchTest("JsonStthm::JsonDoc", StthmDocTestFile, pFile);
 	LaunchTest("Gason", GasonTestFile, pFile);
 	LaunchTest("JsonXX", JsonXXTestFile, pFile);
 	LaunchTest("Json.h", JsonHTestFile, pFile);
