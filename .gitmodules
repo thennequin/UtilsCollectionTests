@@ -1,3 +1,9 @@
 [submodule "Externals/gason"]
 	path = Externals/gason
 	url = https://github.com/vivkin/gason.git
+[submodule "Externals/jsonxx"]
+	path = Externals/jsonxx
+	url = https://github.com/hjiang/jsonxx.git
+[submodule "Externals/json.h"]
+	path = Externals/json.h
+	url = https://github.com/sheredom/json.h.git

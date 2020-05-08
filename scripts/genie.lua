@@ -20,16 +20,21 @@ solution "UtilsCollectionTests"
 							-- https://github.com/vivkin/gason
 							"../Externals/gason/src/gason.cpp",
 							"../Externals/gason/src/gason.h",
-
+							
 							-- https://github.com/hjiang/jsonxx
-							--"../Tests-Externals/gason/src/gason.cpp",
-							--"../Tests-Externals/gason/src/gason.h",
+							"../Externals/jsonxx/jsonxx.cc",
+							"../Externals/jsonxx/jsonxx.h",
+							
+							--  https://github.com/sheredom/json.h
+							"../Externals/json.h/json.h",
 		}
 		
 		includedirs {
 							"../JsonStthm/",
 							"../../UtilsCollection/JsonStthm",
-							"../Externals/gason/src/"
+							"../Externals/gason/src",
+							"../Externals/jsonxx/",
+							"../Externals/json.h/"
 		}
 
 		configuration		"Debug"

@@ -8,9 +8,12 @@
 
 #include <string>
 
-//#include "jsonxx.h"
+#include "jsonxx.h"
+#include <fstream> // std::filebuf
 
 #include "gason.h"
+
+#include "json.h"
 
 uint64_t nanotime() {
 #if defined(__linux__)
@@ -41,6 +44,16 @@ bool StthmTestFile(const char* pFilePath)
 
 bool JsonXXTestFile(const char* pFile)
 {
+	std::filebuf oFileBuf;
+	if (oFileBuf.open(pFile, std::ios::in))
+	{
+		std::istream oIStream(&oFileBuf);
+		jsonxx::Object oJson;
+		bool bOk = oJson.parse(oIStream);
+		oFileBuf.close();
+		return bOk;
+	}
+
 	return false;
 }
 
@@ -61,6 +74,30 @@ bool GasonTestFile(const char* pFilePath)
 		JsonAllocator allocator;
 		int status = jsonParse(pString, &endptr, &value, allocator);
 		bool bOk = JSON_OK == status;
+		delete pString;
+		return bOk;
+	}
+	return false;
+}
+
+bool JsonHTestFile(const char* pFilePath)
+{
+	FILE* pFile = fopen(pFilePath, "r");
+	if (pFile != NULL)
+	{
+		fseek(pFile, 0, SEEK_END);
+		long iSize = ftell(pFile);
+		fseek(pFile, 0, SEEK_SET);
+
+		char* pString = new char[iSize / sizeof(char)];
+		fread(pString, 1, iSize, pFile);
+		fclose(pFile);
+		char *endptr;
+
+		json_value_s* pValue = json_parse(pString, iSize);
+
+		bool bOk = pValue != NULL;
+
 		delete pString;
 		return bOk;
 	}
@@ -115,6 +152,9 @@ void main()
 
 	LaunchTest("Gason", GasonTestFile, pFile);
 	LaunchTest("JsonStthm", StthmTestFile, pFile);
+	LaunchTest("Gason", GasonTestFile, pFile);
+	LaunchTest("JsonXX", JsonXXTestFile, pFile);
+	LaunchTest("Json.h", JsonHTestFile, pFile);
 
 	JsonStthm::JsonValue oValue;
 	JsonStthm::JsonValue& oArray = oValue["myArray"];
