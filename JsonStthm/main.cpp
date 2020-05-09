@@ -73,15 +73,18 @@ bool GasonTestFile(const char* pFilePath)
 		long iSize = ftell(pFile);
 		fseek(pFile, 0, SEEK_SET);
 
-		char* pString = new char[iSize / sizeof(char)];
+		char* pString = (char*)malloc(iSize);
 		fread(pString, 1, iSize, pFile);
 		fclose(pFile);
 		char *endptr;
 		::JsonValue value;
 		JsonAllocator allocator;
+
 		int status = jsonParse(pString, &endptr, &value, allocator);
+
 		bool bOk = JSON_OK == status;
-		delete pString;
+
+		free(pString);
 		return bOk;
 	}
 	return false;
@@ -96,7 +99,7 @@ bool JsonHTestFile(const char* pFilePath)
 		long iSize = ftell(pFile);
 		fseek(pFile, 0, SEEK_SET);
 
-		char* pString = new char[iSize / sizeof(char)];
+		char* pString = (char*)malloc(iSize);
 		fread(pString, 1, iSize, pFile);
 		fclose(pFile);
 		char *endptr;
@@ -105,7 +108,7 @@ bool JsonHTestFile(const char* pFilePath)
 
 		bool bOk = pValue != NULL;
 
-		delete pString;
+		free(pString);
 		return bOk;
 	}
 	return false;
