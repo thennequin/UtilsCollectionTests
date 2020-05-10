@@ -1,179 +1,124 @@
 
+#define BENCHMARKER_USE_MACROS
+#include "Benchmarker.h"
 
-#include <Windows.h>
-
-#include <stdio.h>
-
+// JsonStthm
 #include "JsonStthm.h"
 
-#include <string>
+// vivkin/gason
+#include "gason.h"
 
+// sheredom/JsonH
+#include "json.h"
+
+// hjiang/JsonXX
 #include "jsonxx.h"
 #include <fstream> // std::filebuf
 
-#include "gason.h"
-
-#include "json.h"
-
-uint64_t nanotime() {
-#if defined(__linux__)
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return ts.tv_sec * UINT64_C(1000000000) + ts.tv_nsec;
-#elif defined(__MACH__)
-	static mach_timebase_info_data_t info;
-	if (info.denom == 0)
-		mach_timebase_info(&info);
-	return mach_absolute_time() * info.numer / info.denom;
-#elif defined(_WIN32)
-	static LARGE_INTEGER frequency;
-	if (frequency.QuadPart == 0)
-		QueryPerformanceFrequency(&frequency);
-	LARGE_INTEGER counter;
-	QueryPerformanceCounter(&counter);
-	return counter.QuadPart * UINT64_C(1000000000) / frequency.QuadPart;
-#endif
-}
-
-bool StthmTestFile(const char* pFilePath)
-{
-	JsonStthm::JsonValue oValue;
-	int iLineError = oValue.ReadFile(pFilePath);
-	return iLineError == 0;
-}
-
-bool StthmDocTestFile(const char* pFilePath)
-{
-	JsonStthm::JsonDoc oDoc;
-	int iLineError = oDoc.ReadFile(pFilePath);
-	return iLineError == 0;
-}
-
-bool JsonXXTestFile(const char* pFile)
-{
-	std::filebuf oFileBuf;
-	if (oFileBuf.open(pFile, std::ios::in))
-	{
-		std::istream oIStream(&oFileBuf);
-		jsonxx::Object oJson;
-		bool bOk = oJson.parse(oIStream);
-		oFileBuf.close();
-		return bOk;
-	}
-
-	return false;
-}
-
-bool GasonTestFile(const char* pFilePath)
-{
-	FILE* pFile = fopen(pFilePath, "r");
-	if (pFile != NULL)
-	{
-		fseek(pFile, 0, SEEK_END);
-		long iSize = ftell(pFile);
-		fseek(pFile, 0, SEEK_SET);
-
-		char* pString = (char*)malloc(iSize);
-		fread(pString, 1, iSize, pFile);
-		fclose(pFile);
-		char *endptr;
-		::JsonValue value;
-		JsonAllocator allocator;
-
-		int status = jsonParse(pString, &endptr, &value, allocator);
-
-		bool bOk = JSON_OK == status;
-
-		free(pString);
-		return bOk;
-	}
-	return false;
-}
-
-bool JsonHTestFile(const char* pFilePath)
-{
-	FILE* pFile = fopen(pFilePath, "r");
-	if (pFile != NULL)
-	{
-		fseek(pFile, 0, SEEK_END);
-		long iSize = ftell(pFile);
-		fseek(pFile, 0, SEEK_SET);
-
-		char* pString = (char*)malloc(iSize);
-		fread(pString, 1, iSize, pFile);
-		fclose(pFile);
-		char *endptr;
-
-		json_value_s* pValue = json_parse(pString, iSize);
-
-		bool bOk = pValue != NULL;
-
-		free(pString);
-		return bOk;
-	}
-	return false;
-}
-
-
-void GetReadableSize(int iSize, char* pBuffer, int iBufferSize)
-{
-	static const char* const pSizes[] = { "bytes", "Kb", "Mb", "Gb" };
-	int iDiv = 0;
-	int iRem = 0;
-
-	while (iSize >= 1024 && iDiv < (sizeof pSizes / sizeof *pSizes)) {
-		iRem = (iSize % 1024);
-		iDiv++;
-		iSize /= 1024;
-	}
-
-	snprintf(pBuffer, iBufferSize, "%.1f %s\n", (float)iSize + (float)iRem / 1024.0, pSizes[iDiv]);
-}
-
-void GetReadableTime(uint64_t iNanoseconds, char* pBuffer, int iBufferSize)
-{
-	static const char* const pTimes[] = { "ns", "us", "ms", "s" };
-	int iDiv = 0;
-	int iRem = 0;
-
-	while (iNanoseconds >= 1000 && iDiv < (sizeof pTimes / sizeof *pTimes)) {
-		iRem = (iNanoseconds % 1000);
-		iDiv++;
-		iNanoseconds /= 1000;
-	}
-
-	snprintf(pBuffer, iBufferSize, "%.3f %s\n", (float)iNanoseconds + (float)iRem / 1000.0, pTimes[iDiv]);
-}
-
-void LaunchTest(const char* pName, bool(*pFunction)(const char*), const char* pFile)
-{
-	uint64_t iStartTime = nanotime();
-	bool bOk = pFunction(pFile);
-	uint64_t iEndTime = nanotime();
-
-	char pBuffer[256];
-	GetReadableTime(iEndTime - iStartTime, pBuffer, 256);
-	printf("%s : %s\n\t time %s\n", pName, bOk ? "Ok" : "Fail", pBuffer);
-}
-
 void main()
 {
-	const char* pFile = "../../Data/big.json";
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	LaunchTest("JsonStthm::JsonValue", StthmTestFile, pFile);
-	LaunchTest("JsonStthm::JsonDoc", StthmDocTestFile, pFile);
-	LaunchTest("Gason", GasonTestFile, pFile);
-	LaunchTest("JsonXX", JsonXXTestFile, pFile);
-	LaunchTest("Json.h", JsonHTestFile, pFile);
+	Benchmarker_SetVerbose(true);
 
-	JsonStthm::JsonValue oValue;
-	JsonStthm::JsonValue& oArray = oValue["myArray"];
-	oArray[0] = "test";
-	oArray[1] = false;
-	oArray[2] = 3.14159265359f;
+	BEGIN_TEST_SUITE("JsonStthm")
+		const char* pFile = "../../Data/big.json";
+		JsonStthm::JsonValue oValue;
+		JsonStthm::JsonDoc oDoc;
 
-	std::string sOut;
-	oValue.WriteString(sOut);
+		CHECK(oValue.GetType() == JsonStthm::JsonValue::E_TYPE_INVALID);
+		CHECK(oValue.GetMemberCount() == 0)
+		oValue[0].SetInteger(123);
+		CHECK(oValue.GetMemberCount() == 1)
+		CHECK(oValue[0].GetType() == JsonStthm::JsonValue::E_TYPE_INTEGER);
 
-	system("pause");
+
+		CHECK(oValue.ReadFile(pFile) == 0)
+		CHECK(oDoc.ReadFile(pFile) == 0)
+
+		CHECK(oValue == oDoc.GetRoot())
+
+		char* pJsonPretty = oDoc.GetRoot().WriteString(false);
+		char* pJsonCompact = oDoc.GetRoot().WriteString(true);
+
+		CHECK(pJsonPretty != NULL)
+		CHECK(pJsonCompact != NULL)
+
+		JsonStthm::JsonValue oValuePretty;
+		JsonStthm::JsonValue oValueCompact;
+		CHECK(oValuePretty.ReadString(pJsonPretty) == 0)
+		CHECK(oValueCompact.ReadString(pJsonCompact) == 0)
+
+		CHECK(oValue == oValuePretty)
+		CHECK(oValue == oValueCompact)
+	END_TEST_SUITE()
+
+	Benchmarker_SetVerbose(false);
+
+	BEGIN_BENCHMARK_VERSUS_WITH_ARG("Json parser", const char*,
+		"../../Data/big.json",
+		"../../Data/jeopardy.json",
+		"../../Data/facebook.json"
+	)
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("JsonStthm::JsonValue")
+			JsonStthm::JsonValue oValue;
+			CHECK(oValue.ReadFile(VERSUS_ARG) == 0);
+		END_BENCHMARK_VERSUS_CHALLENGER()
+
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("JsonStthm::JsonDoc")
+			JsonStthm::JsonDoc oDoc;
+			CHECK(oDoc.ReadFile(VERSUS_ARG) == 0);
+		END_BENCHMARK_VERSUS_CHALLENGER()
+
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("vivkin/gason")
+			FILE* pFile = fopen(VERSUS_ARG, "rb");
+			CHECK_FATAL(pFile != NULL)
+
+			fseek(pFile, 0, SEEK_END);
+			long iSize = ftell(pFile);
+			fseek(pFile, 0, SEEK_SET);
+
+			char* pString = (char*)malloc(iSize);
+			CHECK(pString != NULL);
+			CHECK(fread(pString, 1, iSize, pFile) == iSize);
+			fclose(pFile);
+			char *endptr;
+			::JsonValue value;
+			JsonAllocator allocator;
+
+			CHECK(JSON_OK == jsonParse(pString, &endptr, &value, allocator));
+			free(pString);
+		END_BENCHMARK_VERSUS_CHALLENGER()
+
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("sheredom/JsonH")
+			FILE* pFile = fopen(VERSUS_ARG, "rb");
+			CHECK_FATAL(pFile != NULL)
+			fseek(pFile, 0, SEEK_END);
+			long iSize = ftell(pFile);
+			fseek(pFile, 0, SEEK_SET);
+
+			char* pString = (char*)malloc(iSize);
+			CHECK(pString != NULL);
+			CHECK(fread(pString, 1, iSize, pFile) == iSize);
+			fclose(pFile);
+
+			json_value_s* pValue = json_parse(pString, iSize);
+
+			CHECK(pValue != NULL)
+
+			free(pValue);
+			free(pString);
+		END_BENCHMARK_VERSUS_CHALLENGER()
+
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("hjiang/JsonXX")
+			std::filebuf oFileBuf;
+			CHECK_FATAL(oFileBuf.open(VERSUS_ARG, std::ios::in) != NULL)
+			std::istream oIStream(&oFileBuf);
+			jsonxx::Object oJson;
+			CHECK(oJson.parse(oIStream))
+			oFileBuf.close();
+		END_BENCHMARK_VERSUS_CHALLENGER()
+	END_BENCHMARK_VERSUS_ARGS()
+
+	//system("pause");
 }

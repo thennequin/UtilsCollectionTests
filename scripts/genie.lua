@@ -16,6 +16,9 @@ solution "UtilsCollectionTests"
 
 							"../../UtilsCollection/JsonStthm/**.cpp",
 							"../../UtilsCollection/JsonStthm/**.h",
+							
+							"../../UtilsCollection/Benchmarker/**.cpp",
+							"../../UtilsCollection/Benchmarker/**.h",
 
 							-- https://github.com/vivkin/gason
 							"../Externals/gason/src/gason.cpp",
@@ -32,6 +35,7 @@ solution "UtilsCollectionTests"
 		includedirs {
 							"../JsonStthm/",
 							"../../UtilsCollection/JsonStthm",
+							"../../UtilsCollection/Benchmarker",							
 							"../Externals/gason/src",
 							"../Externals/jsonxx/",
 							"../Externals/json.h/"
