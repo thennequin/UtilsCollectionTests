@@ -32,7 +32,11 @@ solution "UtilsCollectionTests"
 							"../Externals/json.h/json.h",
 							
 							-- https://github.com/nlohmann/json
-							"../Externals/nlohmann-json/include/json.hpp"
+							"../Externals/nlohmann-json/include/json.hpp",
+							
+							-- https://github.com/vincenthz/libjson
+							"../Externals/vincenthz-libjson/json.c",
+							"../Externals/vincenthz-libjson/json.h"
 		}
 
 		includedirs {
@@ -41,8 +45,8 @@ solution "UtilsCollectionTests"
 							"../../UtilsCollection/Benchmarker",							
 							"../Externals/gason/src",
 							"../Externals/jsonxx/",
-							"../Externals/json.h/",
-							"../Externals/nlohmann-json/include/"
+							"../Externals/nlohmann-json/include/",
+							"../Externals/" -- To sheredom/json.h and vincenthz/libjson
 		}
 		
 		flags {

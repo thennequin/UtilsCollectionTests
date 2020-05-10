@@ -9,7 +9,10 @@
 #include "gason.h"
 
 // sheredom/JsonH
-#include "json.h"
+namespace sheredom
+{
+#include "json.h/json.h"
+}
 
 // hjiang/JsonXX
 #include "jsonxx.h"
@@ -17,6 +20,12 @@
 
 // nlohmann/json
 #include "nlohmann/json.hpp"
+
+// vincenthz/libjson
+namespace vincenthz
+{
+#include "vincenthz-libjson/json.h"
+}
 
 void main()
 {
@@ -106,7 +115,7 @@ void main()
 			CHECK(fread(pString, 1, iSize, pFile) == iSize);
 			fclose(pFile);
 
-			json_value_s* pValue = json_parse(pString, iSize);
+			sheredom::json_value_s* pValue = sheredom::json_parse(pString, iSize);
 
 			CHECK(pValue != NULL)
 
@@ -131,6 +140,25 @@ void main()
 			nlohmann::json oJson;
 			CHECK_TRY(oIStream >> oJson);
 			oFileBuf.close();
+		END_BENCHMARK_VERSUS_CHALLENGER()
+
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("vincenthz/libjson")
+			FILE* pFile = fopen(VERSUS_ARG, "rb");
+			CHECK_FATAL(pFile != NULL)
+			fseek(pFile, 0, SEEK_END);
+			long iSize = ftell(pFile);
+			fseek(pFile, 0, SEEK_SET);
+
+			char* pString = (char*)malloc(iSize);
+			CHECK(pString != NULL);
+			CHECK(fread(pString, 1, iSize, pFile) == iSize);
+			fclose(pFile);
+
+			vincenthz::json_parser oParser;
+			CHECK(vincenthz::json_parser_init(&oParser, NULL, NULL, NULL) == 0)
+			CHECK(vincenthz::json_parser_string(&oParser, pString, iSize, NULL) == 0)
+			CHECK(vincenthz::json_parser_is_done(&oParser))
+			CHECK(json_parser_free(&oParser) == 0)
 		END_BENCHMARK_VERSUS_CHALLENGER()
 	END_BENCHMARK_VERSUS_ARGS()
 
