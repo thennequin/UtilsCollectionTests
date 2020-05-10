@@ -15,6 +15,9 @@
 #include "jsonxx.h"
 #include <fstream> // std::filebuf
 
+// nlohmann/json
+#include "nlohmann/json.hpp"
+
 void main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -117,6 +120,16 @@ void main()
 			std::istream oIStream(&oFileBuf);
 			jsonxx::Object oJson;
 			CHECK(oJson.parse(oIStream))
+			oFileBuf.close();
+		END_BENCHMARK_VERSUS_CHALLENGER()
+
+		BEGIN_BENCHMARK_VERSUS_CHALLENGER("nlohmann/json")
+			std::filebuf oFileBuf;
+			CHECK_FATAL(oFileBuf.open(VERSUS_ARG, std::ios::in) != NULL)
+			bool bOk = true;
+			std::istream oIStream(&oFileBuf);
+			nlohmann::json oJson;
+			CHECK_TRY(oIStream >> oJson);
 			oFileBuf.close();
 		END_BENCHMARK_VERSUS_CHALLENGER()
 	END_BENCHMARK_VERSUS_ARGS()

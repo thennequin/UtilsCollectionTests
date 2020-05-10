@@ -30,15 +30,19 @@ solution "UtilsCollectionTests"
 							
 							--  https://github.com/sheredom/json.h
 							"../Externals/json.h/json.h",
+							
+							-- https://github.com/nlohmann/json
+							"../Externals/nlohmann-json/include/json.hpp"
 		}
-		
+
 		includedirs {
 							"../JsonStthm/",
 							"../../UtilsCollection/JsonStthm",
 							"../../UtilsCollection/Benchmarker",							
 							"../Externals/gason/src",
 							"../Externals/jsonxx/",
-							"../Externals/json.h/"
+							"../Externals/json.h/",
+							"../Externals/nlohmann-json/include/"
 		}
 		
 		flags {
