@@ -57,8 +57,9 @@ void main()
 
 	BEGIN_BENCHMARK_VERSUS_WITH_ARG("Json parser", const char*,
 		"../../Data/big.json",
-		"../../Data/jeopardy.json",
-		"../../Data/facebook.json"
+		"../../Data/facebook.json",
+		"../../Data/canada.json",
+		"../../Data/jeopardy.json"
 	)
 		BEGIN_BENCHMARK_VERSUS_CHALLENGER("JsonStthm::JsonValue")
 			JsonStthm::JsonValue oValue;
