@@ -40,6 +40,10 @@ solution "UtilsCollectionTests"
 							"../Externals/jsonxx/",
 							"../Externals/json.h/"
 		}
+		
+		flags {
+							"ExtraWarnings"
+		}
 
 		configuration		"Debug"
 			targetsuffix	"_d"
