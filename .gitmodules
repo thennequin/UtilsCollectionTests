@@ -7,3 +7,9 @@
 [submodule "Externals/json.h"]
 	path = Externals/json.h
 	url = https://github.com/sheredom/json.h.git
+[submodule "Externals/nlohmann-json"]
+	path = Externals/nlohmann-json
+	url = https://github.com/nlohmann/json.git
+[submodule "Externals/vincenthz-libjson"]
+	path = Externals/vincenthz-libjson
+	url = https://github.com/vincenthz/libjson
