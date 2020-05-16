@@ -33,37 +33,145 @@ void main()
 
 	Benchmarker_SetVerbose(true);
 
-	BEGIN_TEST_SUITE("JsonStthm")
-		const char* pFile = "../../Data/big.json";
-		JsonStthm::JsonValue oValue;
-		JsonStthm::JsonDoc oDoc;
+	BEGIN_TEST_SUITE("JsonStthm");
+	{
+		BEGIN_TEST_SUITE("Type parser");
+		{
+			JsonStthm::JsonValue oValue;
 
-		CHECK(oValue.GetType() == JsonStthm::JsonValue::E_TYPE_INVALID);
-		CHECK(oValue.GetMemberCount() == 0)
-		oValue[0].SetInteger(123);
-		CHECK(oValue.GetMemberCount() == 1)
-		CHECK(oValue[0].GetType() == JsonStthm::JsonValue::E_TYPE_INTEGER);
+			BEGIN_TEST_SUITE("Null");
+			{
+				CHECK_FATAL(oValue.ReadString("null") == 0);
+				CHECK_FATAL(oValue.IsNull());
+			}
+			END_TEST_SUITE();
 
+			BEGIN_TEST_SUITE("Boolean true");
+			{
+				CHECK_FATAL(oValue.ReadString("true") == 0);
+				CHECK_FATAL(oValue.IsBoolean());
+				CHECK_FATAL(oValue.ToBoolean() == true);
+			}
+			END_TEST_SUITE();
 
-		CHECK(oValue.ReadFile(pFile) == 0)
-		CHECK(oDoc.ReadFile(pFile) == 0)
+			BEGIN_TEST_SUITE("Boolean false");
+			{
+				CHECK_FATAL(oValue.ReadString("false") == 0);
+				CHECK_FATAL(oValue.IsBoolean());
+				CHECK_FATAL(oValue.ToBoolean() == false);
+			}
+			END_TEST_SUITE();
 
-		CHECK(oValue == oDoc.GetRoot())
+			BEGIN_TEST_SUITE("Float NaN");
+			{
+				CHECK_FATAL(oValue.ReadString("NaN") == 0);
+				CHECK_FATAL(oValue.IsFloat());
+				CHECK_FATAL(JsonStthm::Internal::IsNaN(oValue.ToFloat()));
+			}
+			END_TEST_SUITE();
 
-		char* pJsonPretty = oDoc.GetRoot().WriteString(false);
-		char* pJsonCompact = oDoc.GetRoot().WriteString(true);
+			BEGIN_TEST_SUITE("Float Infinity positive");
+			{
+				CHECK_FATAL(oValue.ReadString("Infinity") == 0);
+				CHECK_FATAL(oValue.IsFloat());
+				CHECK_FATAL(JsonStthm::Internal::IsInfinite(oValue.ToFloat()));
+				CHECK_FATAL(oValue.ToFloat() > 0.0);
+			}
+			END_TEST_SUITE();
 
-		CHECK(pJsonPretty != NULL)
-		CHECK(pJsonCompact != NULL)
+			BEGIN_TEST_SUITE("Float Infinity negative");
+			{
+				CHECK_FATAL(oValue.ReadString("-Infinity") == 0);
+				CHECK_FATAL(oValue.IsFloat());
+				CHECK_FATAL(JsonStthm::Internal::IsInfinite(oValue.ToFloat()));
+				CHECK_FATAL(oValue.ToFloat() < 0.0);
+			}
+			END_TEST_SUITE();
 
-		JsonStthm::JsonValue oValuePretty;
-		JsonStthm::JsonValue oValueCompact;
-		CHECK(oValuePretty.ReadString(pJsonPretty) == 0)
-		CHECK(oValueCompact.ReadString(pJsonCompact) == 0)
+			BEGIN_TEST_SUITE("Array empty");
+			{
+				CHECK_FATAL(oValue.ReadString("[]") == 0);
+				CHECK_FATAL(oValue.IsArray());
+				CHECK_FATAL(oValue.GetMemberCount() == 0);
+			}
+			END_TEST_SUITE();
 
-		CHECK(oValue == oValuePretty)
-		CHECK(oValue == oValueCompact)
-	END_TEST_SUITE()
+			BEGIN_TEST_SUITE("Object empty");
+			{
+				CHECK_FATAL(oValue.ReadString("{}") == 0);
+				CHECK_FATAL(oValue.IsObject());
+				CHECK_FATAL(oValue.GetMemberCount() == 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("Array of empty Object");
+			{
+				CHECK_FATAL(oValue.ReadString("[{}, {}]") == 0);
+				CHECK_FATAL(oValue.IsArray());
+				CHECK_FATAL(oValue[0].IsObject());
+				CHECK_FATAL(oValue[0].GetMemberCount() == 0);
+				CHECK_FATAL(oValue[1].IsObject());
+				CHECK_FATAL(oValue[1].GetMemberCount() == 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("Invalid object");
+			{
+				CHECK_FATAL(oValue.ReadString("{ \"name\" }") != 0);
+				CHECK_FATAL(oValue.ReadString("{ \"name\" : }") != 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("Object with numeric");
+			{
+				CHECK_FATAL(oValue.ReadString("{\"a\" : 42}") == 0);
+				CHECK_FATAL(oValue.IsObject());
+				CHECK_FATAL(oValue["a"].IsNumeric());
+				CHECK_FATAL(oValue["a"].ToInteger() == 42);
+			}
+			END_TEST_SUITE();
+		}
+		END_TEST_SUITE();
+
+		BEGIN_TEST_SUITE("JsonValue creation")
+		{
+			JsonStthm::JsonValue oValue;
+			CHECK(oValue.GetType() == JsonStthm::JsonValue::E_TYPE_INVALID);
+			CHECK(oValue.GetMemberCount() == 0);
+			oValue[0].SetInteger(123);
+			CHECK(oValue.GetMemberCount() == 1);
+			CHECK(oValue[0].GetType() == JsonStthm::JsonValue::E_TYPE_INTEGER);
+		}
+		END_TEST_SUITE();
+
+		BEGIN_TEST_SUITE("JsonValue/JsonDoc equality")
+		{
+			JsonStthm::JsonValue oValue;
+			JsonStthm::JsonDoc oDoc;
+
+			const char* pFile = "../../Data/big.json";
+			CHECK(oValue.ReadFile(pFile) == 0);
+			CHECK(oDoc.ReadFile(pFile) == 0);
+
+			CHECK(oValue == oDoc.GetRoot());
+
+			char* pJsonPretty = oValue.WriteString(false);
+			char* pJsonCompact = oValue.WriteString(true);
+
+			CHECK(pJsonPretty != NULL);
+			CHECK(pJsonCompact != NULL);
+
+			JsonStthm::JsonValue oValuePretty;
+			JsonStthm::JsonValue oValueCompact;
+			CHECK(oValuePretty.ReadString(pJsonPretty) == 0);
+			CHECK(oValueCompact.ReadString(pJsonCompact) == 0);
+
+			CHECK(oValue == oValuePretty);
+			CHECK(oValue == oValueCompact);
+		}
+		END_TEST_SUITE();
+	}
+	END_TEST_SUITE();
 
 	Benchmarker_SetVerbose(false);
 
