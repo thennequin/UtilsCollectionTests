@@ -176,7 +176,7 @@ void main()
 		BEGIN_TEST_SUITE("JsonValue creation")
 		{
 			JsonStthm::JsonValue oValue;
-			CHECK(oValue.GetType() == JsonStthm::JsonValue::E_TYPE_INVALID);
+			CHECK(oValue.GetType() == JsonStthm::JsonValue::E_TYPE_NULL);
 			CHECK(oValue.GetMemberCount() == 0);
 			oValue[0].SetInteger(123);
 			CHECK(oValue.GetMemberCount() == 1);
