@@ -88,7 +88,46 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Array empty");
+			BEGIN_TEST_SUITE("String : Empty");
+			{
+				CHECK_FATAL(oValue.ReadString("\"\"") == 0);
+				CHECK_FATAL(oValue.IsString());
+				CHECK_FATAL(strcmp(oValue.ToString(), "") == 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("String : Simple text");
+			{
+				CHECK_FATAL(oValue.ReadString("\"Hello World!\"") == 0);
+				CHECK_FATAL(oValue.IsString());
+				CHECK_FATAL(strcmp(oValue.ToString(), "Hello World!") == 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("String : Escaped chars");
+			{
+				CHECK_FATAL(oValue.ReadString("\" \\n \\r \\t \\b \\f \\\\ \\/ \"") == 0);
+				CHECK_FATAL(oValue.IsString());
+				CHECK_FATAL(strcmp(oValue.ToString(), " \n \r \t \b \f \\ \/ ") == 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("String : UTF8 character (paragraph sign)");
+			{
+				CHECK_FATAL(oValue.ReadString("\" \\u00B6 \\u00b6 \"") == 0);
+				CHECK_FATAL(oValue.IsString());
+				CHECK_FATAL(strcmp(oValue.ToString(), " \xC2\xB6 \xC2\xB6 ") == 0);
+			}
+			END_TEST_SUITE();
+
+			BEGIN_TEST_SUITE("String : UTF8 character with UTF16 surrogate (Ace of Spades)");
+			{
+				CHECK_FATAL(oValue.ReadString("\" \\ud83c\\udca1 \"") == 0);
+				CHECK_FATAL(oValue.IsString());
+				CHECK_FATAL(strcmp(oValue.ToString(), " \xF0\x9F\x82\xA1 ") == 0);
+			}
+			END_TEST_SUITE();
+
 			{
 				CHECK_FATAL(oValue.ReadString("[]") == 0);
 				CHECK_FATAL(oValue.IsArray());
