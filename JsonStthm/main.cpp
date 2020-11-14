@@ -46,7 +46,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Boolean true");
+			BEGIN_TEST_SUITE("Boolean : true");
 			{
 				CHECK_FATAL(oValue.ReadString("true") == 0);
 				CHECK_FATAL(oValue.IsBoolean());
@@ -54,7 +54,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Boolean false");
+			BEGIN_TEST_SUITE("Boolean : false");
 			{
 				CHECK_FATAL(oValue.ReadString("false") == 0);
 				CHECK_FATAL(oValue.IsBoolean());
@@ -62,7 +62,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Float NaN");
+			BEGIN_TEST_SUITE("Float : NaN");
 			{
 				CHECK_FATAL(oValue.ReadString("NaN") == 0);
 				CHECK_FATAL(oValue.IsFloat());
@@ -70,7 +70,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Float Infinity positive");
+			BEGIN_TEST_SUITE("Float : Infinity positive");
 			{
 				CHECK_FATAL(oValue.ReadString("Infinity") == 0);
 				CHECK_FATAL(oValue.IsFloat());
@@ -79,7 +79,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Float Infinity negative");
+			BEGIN_TEST_SUITE("Float : Infinity negative");
 			{
 				CHECK_FATAL(oValue.ReadString("-Infinity") == 0);
 				CHECK_FATAL(oValue.IsFloat());
@@ -128,6 +128,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
+			BEGIN_TEST_SUITE("Array : empty");
 			{
 				CHECK_FATAL(oValue.ReadString("[]") == 0);
 				CHECK_FATAL(oValue.IsArray());
@@ -135,7 +136,7 @@ void main()
 			}
 			END_TEST_SUITE();
 
-			BEGIN_TEST_SUITE("Object empty");
+			BEGIN_TEST_SUITE("Object : empty");
 			{
 				CHECK_FATAL(oValue.ReadString("{}") == 0);
 				CHECK_FATAL(oValue.IsObject());
