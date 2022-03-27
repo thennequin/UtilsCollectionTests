@@ -184,6 +184,22 @@ void main()
 		}
 		END_TEST_SUITE();
 
+		BEGIN_TEST_SUITE( "JsonValue Array Append" )
+		{
+			JsonStthm::JsonValue oValue;
+			oValue = "test";
+			// Disallow Append on string
+			CHECK(oValue.Append().IsValid() == false);
+
+			oValue.Reset();
+			// Allow Append on type Null
+			CHECK(oValue.Append().IsValid());
+
+			// Allow Append on type Array
+			CHECK(oValue.Append().IsValid());
+		}
+		END_TEST_SUITE();
+
 		BEGIN_TEST_SUITE("JsonValue/JsonDoc equality")
 		{
 			JsonStthm::JsonValue oValue;
@@ -208,6 +224,65 @@ void main()
 
 			CHECK(oValue == oValuePretty);
 			CHECK(oValue == oValueCompact);
+		}
+		END_TEST_SUITE();
+
+		BEGIN_TEST_SUITE("JsonValue Iterator invalid")
+		{
+			// On empty/invalid
+			{
+				JsonStthm::JsonValue::Iterator it = &JsonStthm::JsonValue::INVALID;
+				CHECK(it.IsValid() == false);
+			}
+
+			// On NULL
+			{
+				JsonStthm::JsonValue::Iterator it = NULL;
+				CHECK(it.IsValid() == false);
+			}
+		}
+		END_TEST_SUITE();
+
+		BEGIN_TEST_SUITE("JsonValue Iterator object")
+		{
+			JsonStthm::JsonValue oValue;
+
+			oValue["a"].SetInteger(1);
+			oValue["b"].SetFloat(2.f);
+
+			JsonStthm::JsonValue::Iterator it = &oValue;
+
+			CHECK(it.IsValid());
+			CHECK(strcmp(it->GetName(), "a") == 0);
+
+			++it;
+			CHECK(it.IsValid());
+			CHECK(strcmp( it->GetName(), "b") == 0);
+
+			++it;
+			CHECK(it.IsValid() == false);
+		}
+		END_TEST_SUITE();
+
+		BEGIN_TEST_SUITE("JsonValue Iterator array")
+		{
+			JsonStthm::JsonValue oValue;
+
+			oValue.Append().SetInteger(1);
+			oValue.Append().SetString("Test");
+
+			JsonStthm::JsonValue::Iterator it = &oValue;
+
+			CHECK(it.IsValid());
+			CHECK(it->IsInteger());
+
+			++it;
+			CHECK(it.IsValid());
+			CHECK(it->IsString());
+
+			++it;
+			CHECK(it.IsValid() == false);
+
 		}
 		END_TEST_SUITE();
 	}
