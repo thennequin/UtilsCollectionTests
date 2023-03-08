@@ -184,6 +184,69 @@ void main()
 		}
 		END_TEST_SUITE();
 
+		BEGIN_TEST_SUITE("JsonValue Copy")
+		{
+			JsonStthm::JsonValue oLeft, oRight;
+
+			// Integer
+			oRight.SetInteger(24);
+
+			oLeft = oRight;
+			CHECK(oLeft.IsInteger() && oLeft.ToInteger() == 24);
+			
+			oLeft.SetInteger(42);
+			oLeft = oRight;
+			CHECK(oLeft.IsInteger() && oLeft.ToInteger() == 24);
+
+			// Float
+			oRight.SetFloat(24.f);
+
+			oLeft = oRight;
+			CHECK(oLeft.IsFloat() && oLeft.ToInteger() == 24.f);
+
+			oLeft.SetFloat(42.f);
+			oLeft = oRight;
+			CHECK(oLeft.IsFloat() && oLeft.ToInteger() == 24.f);
+
+			// String
+			oRight.SetString("Hello");
+
+			oLeft = oRight;
+			CHECK(oLeft.IsString() && strcmp(oLeft.ToString(), "Hello") == 0);
+
+			oLeft.SetString("World");
+			oLeft = oRight;
+			CHECK(oLeft.IsString() && strcmp(oLeft.ToString(), "Hello") == 0);
+
+			// Array
+			oRight.InitType(JsonStthm::JsonValue::E_TYPE_ARRAY);
+			oRight.Append().SetInteger(42);
+			oRight.Append().SetString("Hello");
+
+			oLeft = oRight;
+			CHECK(oLeft.IsArray() && oLeft.GetMemberCount() == 2 && oLeft[0].IsInteger() && oLeft[0].ToInteger() == 42 && oLeft[1].IsString() && strcmp(oLeft[1].ToString(), "Hello") == 0);
+
+			oLeft.InitType(JsonStthm::JsonValue::E_TYPE_ARRAY);
+			oLeft.Append().SetInteger(24);
+			oLeft = oRight;
+			CHECK(oLeft.IsArray() && oLeft.GetMemberCount() == 2 && oLeft[0].IsInteger() && oLeft[0].ToInteger() == 42 && oLeft[1].IsString() && strcmp(oLeft[1].ToString(), "Hello") == 0);
+
+			// Object
+			oRight.InitType(JsonStthm::JsonValue::E_TYPE_OBJECT);
+			oRight["First"].SetInteger(42);
+			oRight["Second"].SetString("Hello");
+
+			oLeft = oRight;
+			CHECK(oLeft.IsObject() && oLeft.GetMemberCount() == 2 && oLeft[0].IsInteger() && oLeft[0].ToInteger() == 42 && oLeft[1].IsString() && strcmp(oLeft[1].ToString(), "Hello") == 0);
+
+			oLeft.InitType(JsonStthm::JsonValue::E_TYPE_OBJECT);
+			CHECK(oLeft.IsObject() && oLeft.GetMemberCount() == 0);
+			oLeft["Third"].SetInteger(24);
+			oLeft = oRight;
+			CHECK(oLeft.IsObject() && oLeft.GetMemberCount() == 2 && oLeft[0].IsInteger() && oLeft[0].ToInteger() == 42 && oLeft[1].IsString() && strcmp(oLeft[1].ToString(), "Hello") == 0);
+		}
+		END_TEST_SUITE();
+
 		BEGIN_TEST_SUITE( "JsonValue Array Append" )
 		{
 			JsonStthm::JsonValue oValue;
@@ -197,6 +260,66 @@ void main()
 
 			// Allow Append on type Array
 			CHECK(oValue.Append().IsValid());
+		}
+		END_TEST_SUITE();
+
+		BEGIN_TEST_SUITE("JsonValue Combine")
+		{
+			JsonStthm::JsonValue oLeft, oRight, oCombined;
+			
+			// Integer
+			oLeft.SetInteger(42);
+			oRight.SetInteger(24);
+			oCombined = oLeft;
+			CHECK(oCombined.Combine(oRight, false));
+			CHECK(oCombined.IsInteger());
+			CHECK(oCombined.IsInteger() && oCombined.ToInteger() == 66);
+
+			// Float
+			oLeft.SetFloat(42.5f);
+			oRight.SetFloat(24.25f);
+			oCombined = oLeft;
+			CHECK(oCombined.Combine(oRight, false));
+			CHECK(oCombined.IsFloat());
+			CHECK(oCombined.IsFloat() && oCombined.ToFloat() == 66.75f);
+
+			// String
+			oLeft = "Hello";
+			oRight = "World";
+			oCombined = oLeft;
+			CHECK(oCombined.Combine(oRight, false));
+			CHECK(oCombined.IsString());
+			CHECK(oCombined.IsString() && strcmp(oCombined.ToString(), "HelloWorld") == 0);
+
+			// Array
+			oLeft.InitType(JsonStthm::JsonValue::E_TYPE_ARRAY);
+			oRight.InitType(JsonStthm::JsonValue::E_TYPE_ARRAY);
+			oLeft.Append() = "Hello";
+			oRight.Append() = "World";
+			oCombined = oLeft;
+			CHECK(oCombined.Combine(oRight, false));
+			CHECK(oCombined.IsArray());
+			CHECK(oCombined.GetMemberCount() == 2);
+			CHECK(oCombined.IsArray() && oCombined[0].IsString() && strcmp(oCombined[0].ToString(), "Hello") == 0);
+			CHECK(oCombined.IsArray() && oCombined[1].IsString() && strcmp(oCombined[1].ToString(), "World") == 0);
+
+			// Object (replace members)
+			oLeft.InitType(JsonStthm::JsonValue::E_TYPE_OBJECT);
+			oRight.InitType(JsonStthm::JsonValue::E_TYPE_OBJECT);
+			oLeft["Member"]["First"] = "Hello";
+			oRight["Member"]["Second"] = "World";
+			oCombined = oLeft;
+			CHECK(oCombined.Combine(oRight, false));
+			CHECK(oCombined.GetMemberCount() == 1 && oCombined["Member"].GetMemberCount() == 1);
+			CHECK(oCombined["Member"]["First"].IsNull());
+			CHECK(oCombined["Member"]["Second"].IsString() && strcmp(oCombined["Member"]["Second"].ToString(), "World") == 0);
+
+			// Object (merge sub members)
+			oCombined = oLeft;
+			CHECK(oCombined.Combine(oRight, true));
+			CHECK(oCombined.GetMemberCount() == 1 && oCombined["Member"].GetMemberCount() == 2);
+			CHECK(oCombined["Member"]["First"].IsString() && strcmp(oCombined["Member"]["First"].ToString(), "Hello") == 0);
+			CHECK(oCombined["Member"]["Second"].IsString() && strcmp(oCombined["Member"]["Second"].ToString(), "World") == 0);
 		}
 		END_TEST_SUITE();
 
