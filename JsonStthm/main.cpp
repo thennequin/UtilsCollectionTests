@@ -55,6 +55,13 @@ void main()
 		{
 			JsonStthm::JsonValue oValue;
 
+			BEGIN_TEST_SUITE("Incomplete json");
+			{
+				char pData[1] = { '{' };
+				CHECK_FATAL(oValue.ReadString(pData, pData + 1) == 1);
+			}
+			END_TEST_SUITE();
+
 			BEGIN_TEST_SUITE("Null");
 			{
 				CHECK_FATAL(oValue.ReadString("null") == 0);
