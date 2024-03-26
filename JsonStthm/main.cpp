@@ -124,7 +124,7 @@ void main()
 			{
 				CHECK_FATAL(oValue.ReadString("\" \\n \\r \\t \\b \\f \\\\ \\/ \"") == 0);
 				CHECK_FATAL(oValue.IsString());
-				CHECK_FATAL(strcmp(oValue.ToString(), " \n \r \t \b \f \\ \/ ") == 0);
+				CHECK_FATAL(strcmp(oValue.ToString(), " \n \r \t \b \f \\ / ") == 0);
 			}
 			END_TEST_SUITE();
 
