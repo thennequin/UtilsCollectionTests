@@ -5,27 +5,43 @@
 // JsonStthm
 #include "JsonStthm.h"
 
+#define INCLUDE_TEST_GASON
+#define INCLUDE_TEST_SHEREDOM
+#define INCLUDE_TEST_HJIANG
+#define INCLUDE_TEST_NLOHMANN
+#define INCLUDE_TEST_VINCENTHZ
+
+#ifdef INCLUDE_TEST_GASON
 // vivkin/gason
 #include "gason.h"
+#endif // INCLUDE_TEST_GASON
 
+#ifdef INCLUDE_TEST_SHEREDOM
 // sheredom/JsonH
 namespace sheredom
 {
 #include "json.h/json.h"
 }
+#endif // INCLUDE_TEST_SHEREDOM
 
+#ifdef INCLUDE_TEST_HJIANG
 // hjiang/JsonXX
 #include "jsonxx.h"
 #include <fstream> // std::filebuf
+#endif // INCLUDE_TEST_HJIANG
 
+#ifdef INCLUDE_TEST_NLOHMANN
 // nlohmann/json
 #include "nlohmann/json.hpp"
+#endif // INCLUDE_TEST_NLOHMANN
 
+#ifdef INCLUDE_TEST_VINCENTHZ
 // vincenthz/libjson
 namespace vincenthz
 {
 #include "vincenthz-libjson/json.h"
 }
+#endif // INCLUDE_TEST_VINCENTHZ
 
 void main()
 {
@@ -429,6 +445,7 @@ void main()
 			CHECK(oDoc.ReadFile(VERSUS_ARG) == 0);
 		END_BENCHMARK_VERSUS_CHALLENGER()
 
+#ifdef INCLUDE_TEST_GASON
 		BEGIN_BENCHMARK_VERSUS_CHALLENGER("vivkin/gason")
 			FILE* pFile = fopen(VERSUS_ARG, "rb");
 			CHECK_FATAL(pFile != NULL)
@@ -448,7 +465,9 @@ void main()
 			CHECK(JSON_OK == jsonParse(pString, &endptr, &value, allocator));
 			free(pString);
 		END_BENCHMARK_VERSUS_CHALLENGER()
+#endif // INCLUDE_TEST_GASON
 
+#ifdef INCLUDE_TEST_SHEREDOM
 		BEGIN_BENCHMARK_VERSUS_CHALLENGER("sheredom/JsonH")
 			FILE* pFile = fopen(VERSUS_ARG, "rb");
 			CHECK_FATAL(pFile != NULL)
@@ -468,7 +487,9 @@ void main()
 			free(pValue);
 			free(pString);
 		END_BENCHMARK_VERSUS_CHALLENGER()
+#endif // INCLUDE_TEST_SHEREDOM
 
+#ifdef INCLUDE_TEST_HJIANG
 		BEGIN_BENCHMARK_VERSUS_CHALLENGER("hjiang/JsonXX")
 			std::filebuf oFileBuf;
 			CHECK_FATAL(oFileBuf.open(VERSUS_ARG, std::ios::in) != NULL)
@@ -477,7 +498,9 @@ void main()
 			CHECK(oJson.parse(oIStream))
 			oFileBuf.close();
 		END_BENCHMARK_VERSUS_CHALLENGER()
+#endif // INCLUDE_TEST_HJIANG
 
+#ifdef INCLUDE_TEST_NLOHMANN
 		BEGIN_BENCHMARK_VERSUS_CHALLENGER("nlohmann/json")
 			std::filebuf oFileBuf;
 			CHECK_FATAL(oFileBuf.open(VERSUS_ARG, std::ios::in) != NULL)
@@ -487,7 +510,9 @@ void main()
 			CHECK_TRY(oIStream >> oJson);
 			oFileBuf.close();
 		END_BENCHMARK_VERSUS_CHALLENGER()
+#endif // INCLUDE_TEST_NLOHMANN
 
+#ifdef INCLUDE_TEST_VINCENTHZ
 		BEGIN_BENCHMARK_VERSUS_CHALLENGER("vincenthz/libjson")
 			FILE* pFile = fopen(VERSUS_ARG, "rb");
 			CHECK_FATAL(pFile != NULL)
@@ -506,6 +531,7 @@ void main()
 			CHECK(vincenthz::json_parser_is_done(&oParser))
 			CHECK(json_parser_free(&oParser) == 0)
 		END_BENCHMARK_VERSUS_CHALLENGER()
+#endif // INCLUDE_TEST_VINCENTHZ
 	END_BENCHMARK_VERSUS_ARGS()
 
 	//system("pause");
